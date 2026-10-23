@@ -1,0 +1,6 @@
+beautifulsoup4==4.13.4
+plotly==6.1.2
+pandas==2.3.0
+psycopg2-binary==2.9.10
+requests==2.32.4
+streamlit==1.46.1

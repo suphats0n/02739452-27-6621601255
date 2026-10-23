@@ -1,0 +1,13 @@
+ARG AIRFLOW_BASE_IMAGE=apache/airflow:2.10.5-python3.11
+FROM ${AIRFLOW_BASE_IMAGE}
+
+COPY requirements-airflow.txt /tmp/requirements-airflow.txt
+RUN pip install --no-cache-dir \
+    "apache-airflow==2.10.5" \
+    -r /tmp/requirements-airflow.txt \
+    && pip check
+
+COPY --chown=airflow:root ingestion /opt/airflow/ingestion
+COPY --chown=airflow:root etl /opt/airflow/etl
+COPY --chown=airflow:root scripts /opt/airflow/scripts
+ENV PYTHONPATH=/opt/airflow
