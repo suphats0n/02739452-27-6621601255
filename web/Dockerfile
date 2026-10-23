@@ -11,4 +11,4 @@ COPY web /app/web
 COPY scripts /app/scripts
 
 EXPOSE 8501
-CMD ["streamlit", "run", "web/app.py", "--server.address=0.0.0.0", "--server.port=8501"]
+CMD ["streamlit", "run", "web/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--theme.base=dark", "--theme.primaryColor=#22D3EE", "--theme.backgroundColor=#080D1A", "--theme.secondaryBackgroundColor=#151F34", "--theme.textColor=#F8FAFC", "--theme.font=sans serif"]

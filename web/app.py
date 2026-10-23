@@ -1,6 +1,7 @@
 """Thai-language Streamlit dashboard backed exclusively by PostgreSQL."""
 
 import os
+from html import escape
 
 import pandas as pd
 import plotly.express as px
@@ -41,14 +42,90 @@ def read_query(query, params=None):
 st.markdown(
     """
     <style>
-    .stApp {background: linear-gradient(160deg, #101827 0%, #101827 40%, #172338 100%);}
-    [data-testid="stMetric"] {background: #1d2b40; padding: 16px; border-radius: 12px;}
+    :root {color-scheme: dark;}
+    .stApp {background: radial-gradient(ellipse at 85% 0%, #182041 0%, #080D1A 48%); color: #F8FAFC;}
+    html, body, [data-testid="stAppViewContainer"] {font-family: "Segoe UI", Tahoma, sans-serif; color: #F8FAFC;}
+    [data-testid="stMainBlockContainer"] {max-width: 1800px; padding: 1.7rem 2.2rem 2rem;}
+    [data-testid="stHeader"] {background: transparent;}
+    [data-testid="stSidebar"] {background: #10192B; border-right: 1px solid #26344C;}
+    [data-testid="stSidebar"] > div:first-child {padding-top: 1.6rem;}
+    [data-testid="stSidebar"] h2 {font-size: 1.2rem;}
+    [data-testid="stWidgetLabel"] p, [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMetricLabel"] p, h1, h2, h3 {color: #F8FAFC;}
+    [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {color: #94A3B8;}
+    [data-testid="stTextInput"] input {background: #151F34; color: #F8FAFC; caret-color: #22D3EE;}
+    [data-testid="stTextInput"] input::placeholder {color: #94A3B8; opacity: 1;}
+    [data-baseweb="select"] > div {background: #151F34; color: #F8FAFC; border-color: #34445E;}
+    [data-baseweb="select"] input {color: #F8FAFC;}
+    [data-baseweb="popover"], [role="listbox"], [role="option"] {background: #151F34; color: #F8FAFC;}
+    [role="option"]:hover {background: #26344C;}
+    [data-baseweb="tag"] {background: #263C56; color: #F8FAFC;}
+    [data-testid="stSlider"] {color: #F8FAFC;}
+    [data-testid="stMetric"] {background: linear-gradient(135deg, #151F34, #111B2F); border: 1px solid #293751;
+        border-top: 3px solid #22D3EE; padding: 16px 19px; border-radius: 14px; box-shadow: 0 8px 24px #00000024;}
+    [data-testid="stMetricValue"] {color: #F8FAFC; font-size: clamp(1.6rem, 2.6vw, 2.6rem); font-weight: 750; letter-spacing: -.04em;}
+    [data-testid="stMetricLabel"] {color: #CBD5E1; font-size: .85rem;}
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(2) [data-testid="stMetric"] {border-top-color: #34D399;}
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(3) [data-testid="stMetric"] {border-top-color: #A78BFA;}
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:nth-child(4) [data-testid="stMetric"] {border-top-color: #FB7185;}
+    [data-testid="stPlotlyChart"], [data-testid="stDataFrame"] {border: 1px solid #26344C; border-radius: 14px; overflow: hidden; background: #151F34;}
+    [data-testid="stVerticalBlock"] {gap: .8rem;}
+    h3 {font-size: 1.02rem !important; letter-spacing: .01em; padding-top: .3rem !important;}
+    a {color: #67E8F9;}
+    .hero {position: relative; padding: 22px 26px; margin-bottom: 6px; border: 1px solid #2A3A58; border-radius: 18px;
+        background: linear-gradient(110deg, #151F34 0%, #141F38 60%, #262044 100%); overflow: hidden;}
+    .hero::after {content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+        background: linear-gradient(90deg, #22D3EE, #A78BFA 65%, #FB7185);}
+    .hero-kicker {font-size: .68rem; color: #67E8F9; letter-spacing: .2em; font-weight: 700; margin-bottom: 8px;}
+    .hero h1 {font-size: clamp(1.55rem, 2.6vw, 2.6rem); line-height: 1.2; font-weight: 850; padding: 0; letter-spacing: -.03em;}
+    .hero-subtitle {color: #C4B5FD; font-size: .92rem; letter-spacing: .06em; margin: 8px 0 5px;}
+    .hero-description {color: #CBD5E1; font-size: .85rem;}
+    .source-pills {display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px;}
+    .source-pill {font-size: .7rem; color: #E2E8F0; background: #080D1A80; border: 1px solid #39435D; border-radius: 30px; padding: 4px 10px;}
+    .sidebar-brand {font-size: .72rem; letter-spacing: .18em; color: #67E8F9; font-weight: 750; margin-bottom: 12px;}
+    .section-label {color: #94A3B8; font-size: .68rem; letter-spacing: .18em; font-weight: 700; margin-top: 10px;}
+    .pipeline-banner {border: 1px solid #34445E; border-left: 3px solid var(--status); background: #151F34;
+        border-radius: 12px; padding: 12px 16px; color: #F8FAFC; font-size: .9rem; margin-bottom: 10px;}
+    .pipeline-banner strong {color: var(--status);}
+    @media (max-width: 800px) {
+        [data-testid="stMainBlockContainer"] {padding: 1rem;}
+        .hero {padding: 18px;}
+        [data-testid="stMetric"] {padding: 12px;}
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
-st.title("🎮 PC Game Analytics")
-st.caption("แดชบอร์ดวิเคราะห์เกม PC ฟรีและดีลลดราคาจากข้อมูลจริง 3 แหล่ง")
+st.markdown(
+    """<div class="hero">
+    <div class="hero-kicker">GAMING COMMAND CENTER / ANALYTICS</div>
+    <h1>🎮 PC GAME ANALYTICS</h1>
+    <div class="hero-subtitle">Multi-Source Gaming Intelligence</div>
+    <div class="hero-description">สำรวจเกม PC ฟรี ติดตามดีล และวิเคราะห์ตลาดเกมจากข้อมูลจริงในที่เดียว</div>
+    <div class="source-pills"><span class="source-pill">FreeToGame · FREE GAMES</span>
+    <span class="source-pill">CheapShark · DEAL INTELLIGENCE</span>
+    <span class="source-pill">Wikipedia · GAME LIBRARY</span></div></div>""",
+    unsafe_allow_html=True,
+)
+
+PALETTE = ["#22D3EE", "#A78BFA", "#34D399", "#FB7185", "#FBBF24", "#60A5FA"]
+SOURCE_NAMES = {"freetogame": "FreeToGame", "cheapshark": "CheapShark", "wikipedia": "Wikipedia"}
+SOURCE_COLORS = {"FreeToGame": "#34D399", "CheapShark": "#22D3EE", "Wikipedia": "#A78BFA"}
+
+
+def gaming_chart(fig, height=290):
+    fig.update_layout(
+        template="plotly_dark", height=height,
+        paper_bgcolor="#151F34", plot_bgcolor="#151F34",
+        font=dict(family="Segoe UI, Tahoma, sans-serif", color="#E2E8F0", size=12),
+        margin=dict(l=16, r=20, t=30, b=38),
+        colorway=PALETTE,
+        legend=dict(font=dict(color="#E2E8F0"), bgcolor="#151F34"),
+        hoverlabel=dict(bgcolor="#10192B", bordercolor="#64748B", font_color="#F8FAFC"),
+    )
+    fig.update_xaxes(gridcolor="#29354B", zerolinecolor="#34445E", tickfont_color="#CBD5E1", title_font_color="#CBD5E1")
+    fig.update_yaxes(gridcolor="#29354B", zerolinecolor="#34445E", tickfont_color="#CBD5E1", title_font_color="#CBD5E1")
+    return fig
 
 try:
     filters = read_query(
@@ -78,7 +155,10 @@ price_floor = float(min_price) if pd.notna(min_price) else 0.0
 price_ceiling = float(max_price) if pd.notna(max_price) else 0.0
 
 with st.sidebar:
-    st.header("ตัวกรอง")
+    st.markdown('<div class="sidebar-brand">◈ PLAYER INTELLIGENCE</div>', unsafe_allow_html=True)
+    st.header("สำรวจคลังเกม")
+    st.caption("เลือกมุมมองที่สนใจ · ทุกกราฟปรับตามตัวกรอง")
+    search = st.text_input("ค้นหาชื่อเกม", placeholder="พิมพ์ชื่อเกมที่ต้องการ…")
     selected_genres = st.multiselect("ประเภทเกม", filters["genre"].tolist())
     selected_sources = st.multiselect("แหล่งข้อมูล", sources["source"].tolist())
     if price_ceiling > price_floor:
@@ -91,7 +171,9 @@ with st.sidebar:
     else:
         selected_price = (price_floor, price_ceiling)
         st.caption("ยังไม่มีช่วงราคาที่ใช้กรองได้")
-    search = st.text_input("ค้นหาชื่อเกม")
+    st.caption("ช่วงราคาเริ่มต้นแสดงทุกเกม รวมเกมที่ไม่มีข้อมูลราคา")
+    st.divider()
+    st.caption("PC GAME ANALYTICS / 02739452")
 
 conditions = []
 params = []
@@ -211,14 +293,15 @@ except (psycopg2.Error, ValueError) as exc:
     st.stop()
 
 row = totals.iloc[0]
+st.markdown('<div class="section-label">OVERVIEW / ภาพรวมตามตัวกรอง</div>', unsafe_allow_html=True)
 metric_columns = st.columns(4)
-metric_columns[0].metric("เกมทั้งหมด", f"{int(row['games']):,}")
-metric_columns[1].metric("เกมฟรี", f"{int(row['free_games']):,}")
+metric_columns[0].metric("🎮 เกมทั้งหมด", f"{int(row['games']):,}")
+metric_columns[1].metric("✦ เกมฟรี", f"{int(row['free_games']):,}")
 metric_columns[2].metric(
-    "ราคาเฉลี่ย (USD)",
+    "◈ ราคาเฉลี่ย (USD)",
     f"${row['average_price']:.2f}" if pd.notna(row["average_price"]) else "—",
 )
-metric_columns[3].metric("เกมที่กำลังลดราคา", f"{int(row['discounted_games']):,}")
+metric_columns[3].metric("↘ เกมที่กำลังลดราคา", f"{int(row['discounted_games']):,}")
 
 left, right = st.columns(2)
 with left:
@@ -227,25 +310,29 @@ with left:
         st.info("ไม่มีข้อมูลประเภทเกมตามตัวกรอง")
     else:
         st.plotly_chart(
-            px.bar(genres, x="total", y="genre", orientation="h", labels={"total": "จำนวนเกม", "genre": "ประเภท"}),
-            use_container_width=True,
+            gaming_chart(px.bar(genres.sort_values("total"), x="total", y="genre", orientation="h",
+                color_discrete_sequence=["#22D3EE"], labels={"total": "จำนวนเกม", "genre": ""})),
+            use_container_width=True, config={"displayModeBar": False},
         )
 with right:
     st.subheader("จำนวนเกมจากแต่ละแหล่ง")
     if source_counts.empty:
         st.info("ไม่มีข้อมูลแหล่งเกมตามตัวกรอง")
     else:
-        st.plotly_chart(
-            px.bar(source_counts, x="source", y="total", color="source", labels={"source": "แหล่งข้อมูล", "total": "เกมไม่ซ้ำ"}),
-            use_container_width=True,
-        )
+        source_display = source_counts.assign(source=source_counts["source"].map(SOURCE_NAMES))
+        source_figure = px.bar(source_display, x="source", y="total", color="source", text="total",
+            color_discrete_map=SOURCE_COLORS, labels={"source": "", "total": "เกมไม่ซ้ำ"})
+        source_figure.update_layout(showlegend=False)
+        source_figure.update_traces(textposition="outside", cliponaxis=False)
+        st.plotly_chart(gaming_chart(source_figure), use_container_width=True, config={"displayModeBar": False})
 
-st.subheader("เปรียบเทียบราคาและส่วนลด (USD)")
-if price_chart.empty:
-    st.info("ไม่พบข้อมูลราคาและส่วนลดสำหรับตัวกรองนี้")
-else:
-    st.plotly_chart(
-        px.scatter(
+price_panel, pipeline_panel = st.columns([1.25, 1])
+with price_panel:
+    st.subheader("ราคา × ส่วนลด / USD")
+    if price_chart.empty:
+        st.info("ไม่พบข้อมูลราคาและส่วนลดสำหรับตัวกรองนี้")
+    else:
+        st.plotly_chart(gaming_chart(px.scatter(
             price_chart,
             x="normal_price",
             y="sale_price",
@@ -253,12 +340,12 @@ else:
             color="store_name",
             hover_name="title",
             hover_data=["discount_percent"],
+            color_discrete_sequence=PALETTE,
             labels={"normal_price": "ราคาปกติ (USD)", "sale_price": "ราคาลด (USD)", "store_name": "ร้านค้า"},
-        ),
-        use_container_width=True,
-    )
+        ), height=300), use_container_width=True, config={"displayModeBar": False})
 
-st.subheader("รายชื่อเกม")
+st.subheader("Game Explorer / คลังเกม")
+st.caption(f"พบ {len(games):,} เกมตามตัวกรอง · ค้นหาและกรองจากแถบด้านซ้าย · ราคาที่ไม่ระบุแสดงเป็นช่องว่าง")
 display = games.rename(
     columns={
         "title": "ชื่อเกม",
@@ -295,25 +382,32 @@ st.dataframe(
     display[visible_columns],
     use_container_width=True,
     hide_index=True,
-    column_config={"ลิงก์": st.column_config.LinkColumn("ลิงก์", display_text="เปิดเกม")},
+    height=360,
+    column_config={
+        "ลิงก์": st.column_config.LinkColumn("ลิงก์", display_text="↗ เปิดเกม"),
+        "ราคาปกติ (USD)": st.column_config.NumberColumn(format="$%.2f"),
+        "ราคาลด (USD)": st.column_config.NumberColumn(format="$%.2f"),
+        "ส่วนลด (%)": st.column_config.NumberColumn(format="%.1f%%"),
+    },
 )
 
-st.subheader("สถานะ Pipeline ล่าสุด")
-if latest_runs.empty:
-    st.info("ยังไม่มีประวัติ Pipeline — Trigger DAG ใน Airflow เพื่อเริ่มเก็บข้อมูล")
-else:
-    latest = latest_runs.iloc[0]
-    status_label = {
-        "success": "สำเร็จ",
-        "partial_success": "สำเร็จบางแหล่ง",
-        "failed": "ล้มเหลว",
-    }.get(latest["status"], latest["status"])
-    status_columns = st.columns(4)
-    status_columns[0].metric("สถานะล่าสุด", status_label)
-    status_columns[1].metric("ข้อมูลสำเร็จ", int(latest["records_loaded"]))
-    status_columns[2].metric("แหล่งที่ล้มเหลว", int(latest["failed_sources"]))
-    status_columns[3].metric("Quality Check", "ผ่าน" if latest["quality_passed"] else "ไม่ผ่าน")
-    st.caption(f"เริ่ม {latest['started_at']} · เสร็จ {latest['finished_at']}")
-    if latest["error_summary"]:
-        st.warning(latest["error_summary"])
-    st.dataframe(latest_runs, use_container_width=True, hide_index=True)
+with pipeline_panel:
+    st.subheader("Pipeline / สถานะล่าสุด")
+    if latest_runs.empty:
+        st.info("ยังไม่มีประวัติ Pipeline — Trigger DAG ใน Airflow เพื่อเริ่มเก็บข้อมูล")
+    else:
+        latest = latest_runs.iloc[0]
+        status_label = {"success": "สำเร็จ", "partial_success": "สำเร็จบางแหล่ง", "failed": "ล้มเหลว"}.get(latest["status"], latest["status"])
+        status_color = {"success": "#34D399", "partial_success": "#FBBF24", "failed": "#FB7185"}.get(latest["status"], "#94A3B8")
+        st.markdown(f'<div class="pipeline-banner" style="--status:{status_color}">'
+            f'● PIPELINE STATUS &nbsp; <strong>{escape(str(status_label))}</strong></div>', unsafe_allow_html=True)
+        status_columns = st.columns(3)
+        status_columns[0].metric("Records Loaded", f"{int(latest['records_loaded']):,}")
+        status_columns[1].metric("Failed Sources", int(latest["failed_sources"]))
+        status_columns[2].metric("Quality Check", "ผ่าน ✓" if latest["quality_passed"] else "ไม่ผ่าน ✕")
+        finished = pd.to_datetime(latest["finished_at"], utc=True).tz_convert("Asia/Bangkok")
+        st.caption(f"อัปเดต {finished:%d/%m/%Y %H:%M} น. · Asia/Bangkok")
+        if latest["error_summary"]:
+            st.warning(latest["error_summary"])
+        with st.expander("ดูประวัติ Pipeline"):
+            st.dataframe(latest_runs, use_container_width=True, hide_index=True, height=180)
